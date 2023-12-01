@@ -60,8 +60,11 @@ async def view_patch2_list(request: Request):
 
 @app.get("/patch_file/{patch_file_name}", response_class=HTMLResponse)
 async def view_patch_file(request: Request, patch_file_name: str = None):
+    patch_file: str = None
+
     if patch_file_name is not None and re.match(r"^[\w\d\.\-]+$", patch_file_name):
-        if os.path.isfile(f"./patch_files/{patch_file_name:s}") == False:
+        patch_file = os.path.abspath(f"./patch_files/{patch_file_name:s}")
+        if os.path.isfile(patch_file) == False:
             try:
                 response = requests.get(f"https://patch2.gungho.jp/pub/dl-gunghoftp/roftp/{patch_file_name:s}", timeout=2)
                 if response.status_code == 200:
@@ -78,22 +81,22 @@ async def view_patch_file(request: Request, patch_file_name: str = None):
             except requests.RequestException as ex:
                 print("Error:", ex)
 
-        if os.path.isfile(f"./patch_files/{patch_file_name:s}") == False:
+        if patch_file is None or os.path.isfile(patch_file) == False:
             return JSONResponse(content={"status":"error", "message":"File not found."})
 
-        patch_file_size = round(os.path.getsize(f"./patch_files/{patch_file_name:s}") / 1024, 2)
+        patch_file_size = round(os.path.getsize(patch_file) / 1024, 2)
 
         patch_file_digests: dict[str] = {}
-        patch_file_digests["SHA256"]= get_file_hexdigest(f"./patch_files/{patch_file_name:s}", "SHA256")
-        patch_file_digests["SHA3-256"]= get_file_hexdigest(f"./patch_files/{patch_file_name:s}", "SHA3-256")
-        patch_file_digests["SHA1"]= get_file_hexdigest(f"./patch_files/{patch_file_name:s}", "SHA1")
+        patch_file_digests["SHA256"]= get_file_hexdigest(patch_file, "SHA256")
+        patch_file_digests["SHA3-256"]= get_file_hexdigest(patch_file, "SHA3-256")
+        patch_file_digests["SHA1"]= get_file_hexdigest(patch_file, "SHA1")
         patch_include_list: list = []
         patch_include_files: dict[str] = {}
 
         if re.match(r"^.+\.gpf$", patch_file_name):
             iconv_param: list[str] = ["-c", "-f", "EUC-KR", "-t", "UTF-8"]
 
-            grftool: list[str] = [os.getenv("GRFTOOL"), os.path.abspath(f"./patch_files/{patch_file_name:s}")]
+            grftool: list[str] = [os.getenv("GRFTOOL"), patch_file]
 
             iconv: list[str] = [os.getenv("ICONV")]
             iconv.extend(iconv_param)
@@ -109,7 +112,7 @@ async def view_patch_file(request: Request, patch_file_name: str = None):
 
         elif re.match(r"^.+\.rgz$", patch_file_name):
             rgztool = os.getenv("RGZTOOL")
-            subp1 = subprocess.run([rgztool, os.path.abspath(f"./patch_files/{patch_file_name:s}"), "--json-output"], capture_output=True)
+            subp1 = subprocess.run([rgztool, patch_file, "--json-output"], capture_output=True)
             patch_include_list = json.loads(subp1.stdout.decode())
 
         for value in patch_include_list:
