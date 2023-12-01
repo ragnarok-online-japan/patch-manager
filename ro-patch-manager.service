@@ -1,0 +1,13 @@
+[Unit]
+Description=RO Patch manger service
+Before=nginx.service
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/ro-patch-manager
+ExecStart=/home/ec2-user/.local/bin/uvicorn main:app --reload --port 8083
+ExecReload = /bin/kill -s HUP $MAINPID
+ExecStop = /bin/kill -s TERM $MAINPID
+
+[Install]
+WantedBy=default.target
