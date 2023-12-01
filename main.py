@@ -29,7 +29,9 @@ access_enable_exts = ["bmp", "jpg", "png", "wav", "mp3", "txt", "xml"]
 
 encode_euckr_files = [
     "data\\idnum2itemresnametable.txt",
-    "data\\num2itemresnametable.txt"
+    "data\\num2itemresnametable.txt",
+    "data\\resnametable.txt",
+    "data\\num2cardillustnametable.txt"
 ]
 
 @app.get("/")
