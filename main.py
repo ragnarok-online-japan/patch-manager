@@ -21,7 +21,10 @@ load_dotenv()
 
 app = FastAPI(
     title="patch managger",
-    version="0.1.1")
+    version="0.1.1",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None)
 templates = Jinja2Templates(directory="templates")
 
 
