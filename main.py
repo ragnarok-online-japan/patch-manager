@@ -119,7 +119,7 @@ async def view_patch_file(request: Request, patch_file_name: str = None):
             patch_include_list = json.loads(subp1.stdout.decode())
 
         for value in patch_include_list:
-            patch_include_files[value]: dict = {}
+            patch_include_files[value] = {}
             matches = re.match(r".*\.(.+)$", value)
             if matches:
                 patch_include_files[value]["ext"] = matches.group(1)
@@ -136,7 +136,7 @@ async def view_patch_file(request: Request, patch_file_name: str = None):
                                            "patch_file_digests": patch_file_digests,
                                            "patch_file_size": patch_file_size,
                                            "patch_include_files": patch_include_files
-                                           })
+                                          })
 
     return JSONResponse(content={"status":"error", "memssage":"Invalid paramater."})
 
@@ -147,7 +147,7 @@ async def extract_patch_file(request: Request, patch_file_name: str = None, file
         raise HTTPException(status_code=404, detail="File not found")
 
     if filepath is None or filepath == "":
-        raise HTTPException(status_code=400, detail="File requelst is bad")
+        raise HTTPException(status_code=400, detail="File request is bad")
 
     if not re.match(r"^[\w\d\.\-]+$", patch_file_name):
         raise HTTPException(status_code=400, detail="Bad request")
